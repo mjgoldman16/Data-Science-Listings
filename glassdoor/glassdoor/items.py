@@ -12,20 +12,18 @@ class GlassdoorItem(scrapy.Item):
     # define the fields for your item here like:
     job_title = scrapy.Field()
     company_name = scrapy.Field()
-    industry = scrapy.Field()
+    company_info = scrapy.Field()
     salary_est = scrapy.Field()
     salary_high = scrapy.Field()
     salary_low = scrapy.Field()
     job_location = scrapy.Field()
-    hq_location = scrapy.Field()
-    company_size = scrapy.Field()
     description = scrapy.Field()
-    overall_rating = scrapy.Field()
-    friend_percent = scrapy.Field()
-    ceo_approval = scrapy.Field()
-    ceo_name = scrapy.Field()
-    competitors = scrapy.Field()
-    date_posted = scrapy.Field()
+    rating = scrapy.Field()
+    recommend = scrapy.Field()
+    outlook = scrapy.Field()
+    company_pros = scrapy.Field()
+    company_cons = scrapy.Field()
+    post_date = scrapy.Field()
 
 
 
