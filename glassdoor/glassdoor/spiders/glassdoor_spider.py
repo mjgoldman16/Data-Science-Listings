@@ -1,18 +1,18 @@
 from glassdoor.items import GlassdoorItem
 from scrapy import Spider, Request
-# boston         -1154532 -https://www.glassdoor.com/Job/boston-data-scientist-jobs-SRCH_IL.0,6_IC1154532_KO7,21_IP2.htm
-# new-york       -1132348 -https://www.glassdoor.com/Job/new-york-data-scientist-jobs-SRCH_IL.0,8_IC1132348_KO9,23.htm
-# washington  dc -1138213 -https://www.glassdoor.com/Job/washington-data-scientist-jobs-SRCH_IL.0,10_IC1138213_KO11,25.htm
-# san-jose       -1147436 -https://www.glassdoor.com/Job/san-jose-data-scientist-jobs-SRCH_IL.0,8_IC1147436_KO9,23.htm
-# los-angeles    -1146821 -https://www.glassdoor.com/Job/los-angeles-data-scientist-jobs-SRCH_IL.0,11_IC1146821_KO12,26.htm
-# chicago        -1128808 -https://www.glassdoor.com/Job/chicago-data-scientist-jobs-SRCH_IL.0,7_IC1128808_KO8,22.htm
-# austin         -1139761 -https://www.glassdoor.com/Job/austin-data-scientist-jobs-SRCH_IL.0,6_IC1139761_KO7,21.htm
-# huntsville     -1127653 -https://www.glassdoor.com/Job/huntsville-data-scientist-jobs-SRCH_IL.0,10_IC1127653_KO11,25.htm (ONLY 58 JOBS, DROP??)
-# seattle        -1150505 -https://www.glassdoor.com/Job/seattle-data-scientist-jobs-SRCH_IL.0,7_IC1150505_KO8,22.htm
+# boston         -1154532 -https://www.glassdoor.com/Job/   boston     -data-scientist-jobs-SRCH_IL.0, 6   _IC  1154532_KO  7,  21_IP2.htm
+# new-york       -1132348 -https://www.glassdoor.com/Job/   new-york   -data-scientist-jobs-SRCH_IL.0, 8   _IC  1132348_KO  9,  23.htm
+# washington  dc -1138213 -https://www.glassdoor.com/Job/   washington -data-scientist-jobs-SRCH_IL.0, 10  _IC  1138213_KO  11, 25.htm
+# san-jose       -1147436 -https://www.glassdoor.com/Job/   san-jose   -data-scientist-jobs-SRCH_IL.0, 8   _IC  1147436_KO  9,  23.htm
+# los-angeles    -1146821 -https://www.glassdoor.com/Job/   los-angeles-data-scientist-jobs-SRCH_IL.0, 11  _IC  1146821_KO  12, 26.htm
+# chicago        -1128808 -https://www.glassdoor.com/Job/   chicago    -data-scientist-jobs-SRCH_IL.0, 7   _IC  1128808_KO  8,  22.htm
+# austin         -1139761 -https://www.glassdoor.com/Job/   austin     -data-scientist-jobs-SRCH_IL.0, 6   _IC  1139761_KO  7,  21.htm
+# huntsville     -1127653 -https://www.glassdoor.com/Job/   huntsville -data-scientist-jobs-SRCH_IL.0, 10  _IC  1127653_KO  11, 25.htm (ONLY 58 JOBS, DROP??)
+# seattle        -1150505 -https://www.glassdoor.com/Job/   seattle    -data-scientist-jobs-SRCH_IL.0, 7   _IC  1150505_KO  8,  22.htm
 # Denver         -1148170
 # san francisco  -1147401
 # miami          -1154170
-# tampa          -1154429 -https://www.glassdoor.com/Job/tampa-data-scientist-jobs-SRCH_IL.0,5_IC1154429_KO6,20.htm
+# tampa          -1154429 -https://www.glassdoor.com/Job/   tampa      -data-scientist-jobs-SRCH_IL.0, 5    _IC 1154429_KO  6,  20_IP3.htm
 # palo alto      -1147434
 # houston        -1140171
 # atlanta        -1155583
@@ -26,6 +26,7 @@ class GlassDoorSpider(Spider):
                 1154170, 1154429, 1147434, 1140171, 1155583]
     print("SETTING UP URL")
     cities = list(zip(cities, city_ids))
+    #This is ugly list comprehension, but hey, now I know double list comprehension!
     start_urls = [("https://www.glassdoor.com/Job/" +
                   str(city[0]) +
                   "-data-scientist-jobs-SRCH_IL.0," +
@@ -42,13 +43,13 @@ class GlassDoorSpider(Spider):
 
 
     def parse(self, response):
-        print("%" * 100)
-        print("SCRAPING A NEW PAGE")
-        print("%" * 100)
+        # print("%" * 100)
+        # print("SCRAPING A NEW PAGE")
+        # print("%" * 100)
         job_ids = response.xpath("//ul[@class='jlGrid hover']/li/@data-id").extract() #an example id: 2220873086
-        print(job_ids)
-        print("Got the links")
-        print("-"*50)
+        # print(job_ids)
+        # print("Got the links")
+        # print("-"*50)
         links = ["https://www.glassdoor.com/job-listing/-JV_IC1146821_KO0,14_KE15,23.htm?jl=" + job_id for job_id in job_ids]
 
         for url in links:
@@ -56,7 +57,7 @@ class GlassDoorSpider(Spider):
             # yield SplashRequest(url, callback=self.parse_job, endpoint = 'render.html')
 
     def parse_job(self, response):
-        print("~"*50)
+        # print("~"*50)
         print("STARTING PARSING ON JOB")
         job_title = response.xpath('//h2[@class="noMargTop margBotXs strong"]/text()').extract_first()
         try:
@@ -77,24 +78,43 @@ class GlassDoorSpider(Spider):
             salary_low = response.xpath('//div[@class="minor cell alignLt"]/text()').extract_first()[1:]
             salary_high = response.xpath('//div[@class="minor cell alignRt"]/text()').extract_first()[1:]
         except:
-            salary_high = salary_low = "None"
+            salary_high = salary_low = None
+            # print("***", company_name, "HAS NO SALARY ***")
         try:
             post_date = response.xpath('//span[@class="minor nowrap"]/text()').extract_first()[1:]
         except:
-            post_date = "None"
+            post_date = None
+            # print("***", company_name, "HAS NO POST DATE ***")
         company_id = response.xpath('//div[@id="EmpBasicInfo"]/@data-emp-id').extract_first()
+        if company_id == None:
+            # print(company_name, company_id, "ERROR OUT")
+            company_id = response.xpath('//span[@class="hidden ratingsDetailsInfo"]/@data-employer-id').extract_first()
+        if company_id == None:
+            print("!"*50)
+            print(company_name, "HAS NO OVERVIEW, SKIPPING REVIEWS OR OVERVIEW, SKIPPING NEXT TWO FUNCTIONS")
+            item = GlassdoorItem()
+            item["job_title"] = job_title
+            item["company_name"] = company_name
+            item["salary_est"] = salary_est
+            item["salary_high"] = salary_high
+            item["salary_low"] = salary_low
+            item["description"] = description
+            item["rating"] = rating
+            item["post_date"] = post_date
+            yield item
         overview_link = "https://www.glassdoor.com/Job/overview/companyOverviewBasicInfoAjax.htm?employerId=" + company_id + "&title=+Overview&linkCompetitors=true"
 
-        print("*** JOB TITLE   ***", job_title)
-        print("*** COMPANY     ***", company_name)
-        print("*** LOCATION    ***", job_location)
-        print("*** RATING      ***", rating)
-        print("*** SALARY      ***", salary_est)
-        print("*** SALARY LOW  ***", salary_low)
-        print("*** SALARY HIGH ***", salary_high)
-        print("*** POST DATE   ***", post_date)
+        # print("*** JOB TITLE   ***", job_title)
+        # print("*** COMPANY     ***", company_name)
+        # print("*** LOCATION    ***", job_location)
+        # print("*** RATING      ***", rating)
+        # print("*** SALARY      ***", salary_est)
+        # print("*** SALARY LOW  ***", salary_low)
+        # print("*** SALARY HIGH ***", salary_high)
+        # print("*** POST DATE   ***", post_date)
         #print("*** DESCRIPTION ***", description)
-        print("~" * 50)
+        print(company_name, "- JOB PAGE DONE")
+        # print("~" * 50)
 
         yield Request(overview_link, callback=self.parse_overview, meta ={"company_id":company_id,
                                                                           "job_title": job_title,
@@ -109,8 +129,8 @@ class GlassDoorSpider(Spider):
 
 
     def parse_overview(self, response):
-        print("+"*50)
-        print("Break the first trojan wall - OVERVIEW")
+        # print("+"*50)
+        # print("Break the first trojan wall - OVERVIEW")
         #Kicking the can down the road
         company_id = response.meta['company_id']
         job_title = response.meta['job_title']
@@ -122,13 +142,14 @@ class GlassDoorSpider(Spider):
         salary_high = response.meta['salary_high']
         post_date = response.meta['post_date']
         description = response.meta['description']
-        print(company_name)
+        # print(company_name)
         labels = response.xpath('//div[@class = "info flexbox row col-hh"]/div/label/text()').extract()
         values = response.xpath('//div[@class = "info flexbox row col-hh"]/div/span/text()').extract()
         values = list(map(str.strip, values))
         company_info = list(zip(labels,values))
         #a list of tuples, will need to sort them out where first element is var name, 2nd is value
-        print(company_info) #Walmart has an error with this
+        # print(company_info) #Walmart has an error with this
+        print(company_name, "- REVIEW PAGE DONE")
         print("+"*50)
 
 
@@ -160,7 +181,7 @@ class GlassDoorSpider(Spider):
 
         reviews = response.xpath('//div[@class="tbl fill"]')
         for review in reviews:
-            print("="*50)
+            # print("="*50)
             company_pros = "\n".join(review.xpath('.//p[@class=" pros mainText truncateThis wrapToggleStr"]/text()').extract())
             company_cons = "\n".join(review.xpath('.//p[@class=" cons mainText truncateThis  wrapToggleStr"]/text()').extract())
             try:
@@ -168,13 +189,13 @@ class GlassDoorSpider(Spider):
                 outlook = review.xpath('.//div[@class="flex-grid recommends"]//div/span/text()').extract()[1]
             except:
                 recommend = outlook = "Recommendation or Outlook not listed"
-            print("MADE IT TO REVIEWS")
-            print("COMPANY NAME", company_name)
-            print("*** PROS ***", company_pros)
-            print("*** CONS ***", company_cons)
-            print("RECOMMEND***", recommend)
-            print("**OUTLOOK***", outlook)
-            print("="*50)
+            # print("MADE IT TO REVIEWS")
+            print(company_name, "- REVIEWS DONE")
+            # print("*** PROS ***", company_pros)
+            # print("*** CONS ***", company_cons)
+            # print("RECOMMEND***", recommend)
+            # print("**OUTLOOK***", outlook)
+            # print("="*50)
 
             item = GlassdoorItem()
             item["job_title"] = job_title
