@@ -2,29 +2,31 @@ import pandas as pd
 import numpy as np
 from matplotlib import pyplot as plt
 import re
-import spicy
 import plotly
-from plotly.graph_objs import Figure, Bar, Histogram, Layout, Scatter
+from plotly.graph_objs import Figure, Bar, Layout, Scatter, Box
 import time
-#
-# df = pd.read_csv("./Scraped-data/testing_reviews.csv") # this is 13k
+import spicy
+import seaborn as sns
+from sklearn import linear_model
+import statsmodels.api as sm
+from statsmodels.stats.multicomp import pairwise_tukeyhsd, MultiComparison
+
+# df = pd.read_csv("./Data/testing_reviews.csv") # this is 13k. but same number in terms of salary. not much diff
 #
 # print(df.isnull().sum())
-# print(len(pd.unique(df["job_location"])))
 # print(len(pd.unique(df["company_name"]))) #2.6k unique companies for the larger df
 # print(df.columns)
-
+#
 # df = df[(df["company_name"]!="*** ERROR - NO COMPANY LISTED. SEE DESCRIPTION FOR POSSIBLE HINTS *** [XX]") & (df["company_info"].isnull()!=True)]
 # print((df["company_name"]=="*** ERROR - NO COMPANY LISTED. SEE DESCRIPTION FOR POSSIBLE HINTS *** [XX]").sum())
 # print(df["company_info"].isnull().sum())
-# # print(df["company)info"].contains(">").sum())
 # print(len(df))
 # df.dropna()
 # print(len(df))
+# df = df.reset_index()
 
 ###CLEANING DATA
-df = pd.read_csv("./Scraped-data/reviews.csv") # this is 8k and has all rows filled in so do not need to drop "ERROR"s
-
+df = pd.read_csv("./Data/reviews.csv") # this is 8k and has all rows filled in so do not need to drop "ERROR"s
 print(df.columns.values)
 # Company info is a string of a list of tuples, so we need to extract the first element and set that as the variable
 # name and take the second element and put it at the variable name. First make it into a list of tuples
@@ -144,29 +146,69 @@ distinct_df["Javascript"] = [1 if x else 0 for x in javascript]
 distinct_df["Hive"] = [1 if x else 0 for x in hive]
 distinct_df["Web Scraping"] = [1 if x else 0 for x in webscrape]
 
-print("Frequency of skills listed for Data Science jobs (1.7k unique postings):")
-print("python           :",len([x for x in python if x]))
-print("R                :", len([x for x in R if x]))
-print("SQL              :", len([x for x in SQL if x]))
-print("Java             :",len([x for x in java if x]))
-print("C, C++, or Csharp:",len([x for x in C if x]))
-print("Hadoop           :", len([x for x in hadoop if x]))
-print("Spark            :", len([x for x in hadoop if x]))
-print("Excel            :",len([x for x in excel if x]))
-print("SAS              :", len([x for x in sas if x]))
-print("Stata            :",len([x for x in stata if x]))
-print("Matlab           :",len([x for x in matlab if x]))
-print("VBA              :",len([x for x in vba if x]))
-print("Scala            :",len([x for x in scala if x]))
-print("tableau          :",len([x for x in tableau if x]))
-print("h2o              :",len([x for x in h2o if x]))
-print("ruby             :",len([x for x in ruby if x]))
-print("HTML             :",len([x for x in html if x]))
-print("CSS              :",len([x for x in css if x]))
-print("javascript       :",len([x for x in javascript if x]))
-print("hive             :",len([x for x in hive if x]))
-print("scrape           :",len([x for x in webscrape if x]))
+python_len = len([x for x in python if x])
+R_len = len([x for x in R if x])
+SQL_len =  len([x for x in SQL if x])
+java_len = len([x for x in java if x])
+C_len = len([x for x in C if x])
+hadoop_len =  len([x for x in hadoop if x])
+spark_len = len([x for x in hadoop if x])
+excel_len = len([x for x in excel if x])
+sas_len = len([x for x in sas if x])
+stata_len = len([x for x in stata if x])
+matlab_len = len([x for x in matlab if x])
+vba_len = len([x for x in vba if x])
+scala_len = len([x for x in scala if x])
+tableau_len = len([x for x in tableau if x])
+h2o_len = len([x for x in h2o if x])
+ruby_len = len([x for x in ruby if x])
+html_len = len([x for x in html if x])
+css_len = len([x for x in css if x])
+javascript_len = len([x for x in javascript if x])
+hive_len = len([x for x in hive if x])
+scrape_len = len([x for x in webscrape if x])
 
+print("Frequency of skills listed for Data Science jobs (1.7k unique postings):")
+print("python           :", python_len)
+print("R                :", R_len)
+print("SQL              :", SQL_len)
+print("Java             :", java_len)
+print("C, C++, or Csharp:", C_len)
+print("Hadoop           :", hadoop_len)
+print("Spark            :", spark_len)
+print("Excel            :", excel_len)
+print("SAS              :", sas_len)
+print("Stata            :", stata_len)
+print("Matlab           :", matlab_len)
+print("VBA              :", vba_len)
+print("Scala            :", scala_len)
+print("tableau          :", tableau_len)
+print("h2o              :", h2o_len)
+print("ruby             :", ruby_len)
+print("HTML             :", html_len)
+print("CSS              :", css_len)
+print("javascript       :", javascript_len)
+print("hive             :", hive_len)
+print("scrape           :", scrape_len)
+
+# print("Java             :", java_len)
+# print("C, C++, or Csharp:", C_len)
+# print("Hadoop           :", hadoop_len)
+# print("Spark            :", spark_len)
+# print("Excel            :", excel_len)
+# print("SAS              :", sas_len)
+# print("Stata            :", stata_len)
+# print("Matlab           :", matlab_len)
+# print("VBA              :", vba_len)
+# print("Scala            :", scala_len)
+# print("tableau          :", tableau_len)
+# print("h2o              :", h2o_len)
+# print("ruby             :", ruby_len)
+# print("HTML             :", html_len)
+# print("CSS              :", css_len)
+# print("javascript       :", javascript_len)
+# print("hive             :", hive_len)
+# print("scrape           :", scrape_len)
 # In order to convert instances where description lists out the number of years experience in word format, we need to
 # change these words into ints
 numbers = dict({"one":1, "two":2, "three":3, "four":4,"five":5, "six":6, "seven":7, "eight":8, "nine":9, "ten":10,
@@ -190,30 +232,65 @@ for i in range(0, len(desc_col) - 1):
 distinct_df["description"] = desc_col
 
 distinct_df["state"] = distinct_df["job_location"].str[-2:]
+distinct_df = distinct_df[distinct_df["state"]!="IN"]
 print(len(distinct_df["state"].unique()))
 print(distinct_df["state"].unique())
 
-print(distinct_df['state'].value_counts())
+# print(distinct_df['state'].value_counts())
+# print(distinct_df["job_location"].value_counts())
+
 #hotones state (drop states that have super little)
 
-###GRAPHING RESULTS
+################################################### GRAPHING RESULTS ###################################################
+# Setting up looping variables for graphing
 education = [("Bachelors",sum(distinct_df["bachelors"])),
              ("MBA", sum(distinct_df["mba"])),
              ("Masters", sum(distinct_df["masters"])),
              ("PhD", sum(distinct_df["phd"]))]
 
+skills = [("SQL", SQL_len),
+          ("Python", python_len),
+          ("R", R_len),
+          ("Java", java_len),
+          ("Hadoop", hadoop_len),
+          ("Spark", spark_len),
+          ("Excel", excel_len),
+          ("Tableau", tableau_len),
+          ("SAS", sas_len),
+          ("C, C++, or C Sharp", C_len),
+          ("Scala", scala_len),
+          ("MatLab", matlab_len),
+          ("Hive", hive_len),
+          ("Javascript", javascript_len),
+          ("Ruby", ruby_len),
+          ("HTML", html_len),
+          ("VBA", vba_len),
+          ("Stata", stata_len),
+          ("H2O", h2o_len),
+          ("CSS", css_len),
+          ("Scrapy or Selenium", scrape_len)]
+
 ## Count v Education
 data = [Bar(x=[val[0] for val in education],
             y=[val[1] for val in education])]
-layout = Layout(title = "Data Science Job Offerings Based on Education Requirments")
+layout = Layout(title = "Data Science Job Offerings Based on Education Requirements",
+                xaxis = dict(title = "Education Levels"),
+                yaxis = dict(title = "Number of Job Postings"))
 fig = Figure(data=data, layout=layout)
 plotly.offline.plot(fig, show_link=False)
-time.sleep(1)
-# plt.bar(range(len(education)), [val[1] for val in education], align="center")
-# plt.xticks(range(len(education)), [val[0] for val in education])
-# plt.show()
-# plt.bar()
+time.sleep(.5)
 
+# Count v Skills
+data = [Bar(x = [val[0] for val in skills],
+            y = [val[1] for val in skills])]
+layout = Layout(title = "Data Science Job Offerings Based on Skill Requirements",
+                xaxis = dict(title = "Skills"),
+                yaxis = dict(title = "Number of Job Postings"))
+fig = Figure(data = data, layout= layout)
+plotly.offline.plot(fig,show_link=False)
+time.sleep(.5)
+
+## Count v State
 distinct_df = distinct_df.sort_values("state")
 loc_cat = distinct_df["state"].unique()
 # print(type(loc_cat))
@@ -221,31 +298,275 @@ loc_count = distinct_df.groupby("state")["state"].count()
 # print(loc_count)
 data = [Bar(x=loc_cat, y = loc_count)]
 # location_df = distinct_df.groupby("job_location").count()
-layout = Layout(title="Data Science Job Offerings Based on Location")
+layout = Layout(title="Data Science Job Offerings Based on Location",
+                xaxis = dict(title = "States"),
+                yaxis = dict(title = "Number of Job Postings"))
 fig = Figure(data=data, layout=layout)
 plotly.offline.plot(fig, show_link=False)
-time.sleep(1)
+time.sleep(.5)
 
+
+## Count v Salary by Industry
 distinct_df = distinct_df.sort_values("Industry")
 ind_count = distinct_df.groupby("Industry")["Industry"].count()
 ind_sal = distinct_df.groupby("Industry")["salary_est"].agg("median")
-data = [Scatter(x=ind_sal, y=ind_count, mode = 'markers', text = distinct_df["Industry"].unique())]
-layout = Layout(title="Data Science Job Median Salary Based on Industry")
+data = [Scatter(x=ind_sal,
+                y=ind_count,
+                mode = 'markers',
+                text = distinct_df["Industry"].unique())]
+layout = Layout(title="Data Science Job Median Salary Compared to Number of Postings Based on Industry",
+                xaxis = dict(title = "Median Salary"),
+                yaxis = dict(title = "Number of Job Postings"))
 fig = Figure(data=data, layout=layout)
 plotly.offline.plot(fig, show_link=False)
-time.sleep(1)
+time.sleep(.5)
 
-# LOOK INTO INFORMATION TECHNOLOGY JOBS SINCE SUCH AN OUTLIER
+# LOOK INTO INFORMATION TECHNOLOGY JOBS SINCE SUCH AN OUTLIER [XX] ***
 # CHECK SKILLS AND EDUCATION LEVEL
+median_rent = pd.read_csv("D:/NYC-Data-Science/Projects/Webscrapping-Project/glassdoor/Data/Top 25 DS cities median rent.csv")
+top25_median = distinct_df.merge(median_rent,how = "inner", left_on = "job_location", right_on = "Location", sort = True)
+top25_median["Median Yearly 1 BB rent"]= top25_median["Median Yearly 1 BB rent"].astype(int)
+top25_median["sal_ratio"] = top25_median["salary_est"]/top25_median["Median Yearly 1 BB rent"]
+
+## ATTEMPT AT SORTING BASED ON MEDIAN OF DATAPOINTS RATHER THAN ALPHABETICALLY XX***
+# top25_median["sorted_med"] = top25_median.groupby("job_location")["salary_est"].agg("median")
+# top25_median = top25_median.sort_values("sorted_med")
+# top25_median = top25_median.sort_values(top25_median.sal_ratio[top25_median.job_location].agg("median")).reset_index()
+
+#SEABORN NOT JITTERING XX ***
+# sns.stripplot(x = distinct_df["salary_est"]/1000,
+#               y = distinct_df["rating"],
+#               jitter = True,
+#               edgecolor= "none").set_title("Data Science Salaries Compared to Company Rating")
+# plt.xlabel("Job Salary (in Thousands)")
+# plt.ylabel("Company Rating")
+# plt.show()
+
+#PLOTLY DOESN'T HAVE A JITTER FOR SCATTERPLOTS
+data = Scatter(x = distinct_df["salary_est"],
+                y = distinct_df["rating"],
+                mode = "markers",
+                text = distinct_df["company_name"],
+               name = "Companies")
+
+## Regression
+regr = linear_model.LinearRegression()
+x = distinct_df.iloc[:,[3,5]]
+regr.fit(distinct_df[["salary_est"]], distinct_df["rating"])
+# The coefficients
+print('Coefficients: \n', regr.coef_)
+# The mean squared error
+print("Mean squared error: %.2f"
+      % np.mean((regr.predict(distinct_df[["salary_est"]]) - distinct_df["rating"]) ** 2))
+# Explained variance score: 1 is perfect prediction
+print('Variance score: %.2f' % regr.score(distinct_df[["salary_est"]], distinct_df["rating"]))
+print(regr.predict((distinct_df[["salary_est"]])))
+
+reg_line = Scatter(x = distinct_df["salary_est"],
+                    y = regr.predict(distinct_df[["salary_est"]]),
+                    mode = "lines",
+                    line = dict(color = "black", width = 3),
+                   name = "OLS Regression")
+
+layout = Layout(title = "Data Science Salaries Compared to Company Rating",
+                xaxis = dict(title = "Job Salaries"),
+                yaxis = dict(title = "Company Rating"),
+                showlegend = False)
+
+x = sm.add_constant(distinct_df[["salary_est"]])
+model = sm.OLS(distinct_df["rating"], x)
+results = model.fit()
+print(results.summary())
+
+
+fig = Figure(data=[data,reg_line], layout = layout)
+
+plotly.offline.plot(fig, show_link=False)
+time.sleep(.5)
+
+# Median salary vs. location
+data = [{"y": top25_median.salary_est[top25_median.job_location == i],
+         "name": i,
+         "type": "box",
+         "boxmean": True} for i in top25_median.job_location.unique()]
+time.sleep(.5)
+
+layout = Layout(title = "Data Science Salaries Range Based on Location",
+                xaxis = dict(title = "Cities"),
+                yaxis = dict(title = "Salary Range"))
+fig = Figure(data = data, layout = layout)
+plotly.offline.plot(fig, show_link=False)
+time.sleep(.5)
+
+# Median Salary/Rent vs location
+data = [{"y": top25_median.sal_ratio[top25_median.job_location == i],
+         "name": i,
+         "type": "box",
+         "boxmean": True} for i in top25_median["job_location"].unique()]
+
+layout = Layout(title = "Ratio of Data Science Salaries Over Median Cost of a One Bed Room Apartment",
+                xaxis = dict(title = "Cities"),
+                yaxis = dict(title = "Ratio of Salaries over Median Cost of a One Bed Room Apartment"))
+fig = Figure(data = data, layout = layout)
+plotly.offline.plot(fig, show_link=False)
+time.sleep(.5)
+
+# salary vs size
+# def sort_df(df, column_idx, key):
+#     '''Takes dataframe, column index and custom function for sorting,
+#     returns dataframe sorted by this column using this function'''
+#
+#     col = df.ix[:, column_idx]
+#     temp = np.array(col.values.tolist())
+#     order = sorted(range(len(temp)), key=lambda j: key(temp[j]))
+#     return df.ix[order]
+sizes = ['1 to 50 employees', '51 to 200 employees',  '201 to 500 employees', '501 to 1000 employees',
+         '1001 to 5000 employees', '5001 to 10000 employees', '10000+ employees', 'Unknown']
+
+distinct_df["Size"] = pd.Categorical(
+    distinct_df["Size"],
+    categories=sizes,
+    ordered = True
+)
+distinct_df = distinct_df.sort_values("Size")
+
+
+data = [{"y": distinct_df.salary_est[distinct_df.Size == i],
+         "name": i,
+         "type": "box",
+         "boxmean": True} for i in distinct_df["Size"].unique()]
+
+layout = Layout(title = "Data Science Salaries Based on Company Size",
+                xaxis = dict(title = "Size of the Company"),
+                yaxis = dict(title = "Salary Range"))
+fig = Figure(data = data, layout = layout)
+plotly.offline.plot(fig, show_link=False)
+time.sleep(.5)
+
+# Education v salary range
+bachelors_sal = Box(y = distinct_df.salary_est[distinct_df.bachelors == 1],
+                    name = "Bachelor's Degree",
+                    boxmean = True)
+mba_sal = Box(y = distinct_df.salary_est[distinct_df.mba == 1],
+              name = "MBA Degree",
+              boxmean=True)
+masters_sal = Box(y = distinct_df.salary_est[distinct_df.masters == 1],
+                  name = "Master's Degree",
+                  boxmean=True)
+phd_sal = Box(y = distinct_df.salary_est[distinct_df.phd == 1],
+              name = "Doctorate Degree",
+              boxmean=True)
+data = [bachelors_sal, mba_sal, masters_sal, phd_sal]
+layout = Layout(title = "Data Science Salaries Based on Education Level",
+                xaxis = dict(title = "Level of Education"),
+                yaxis = dict(title = "Salary Range"))
+fig = Figure(data = data, layout = layout)
+plotly.offline.plot(fig, show_link=False)
+time.sleep(.5)
+
+regr = linear_model.LinearRegression()
+regr.fit(distinct_df[["bachelors","mba","masters","phd"]], distinct_df["salary_est"])
+# The coefficients
+print('Coefficients: \n', regr.coef_)
+# The mean squared error
+print("Mean squared error: %.2f"
+      % np.mean((regr.predict(distinct_df[["bachelors","mba","masters","phd"]]) - distinct_df["salary_est"]) ** 2))
+# Explained variance score: 1 is perfect prediction
+print('Variance score: %.2f' % regr.score(distinct_df[["bachelors","mba","masters","phd"]], distinct_df["salary_est"]))
+print(regr.predict((distinct_df[["bachelors","mba","masters","phd"]])))
+
+edu_df = distinct_df[["bachelors","mba","masters","phd"]].values.reshape(-1,1)
+x = sm.add_constant(edu_df)
+model = sm.OLS(edu_df, x)
+results = model.fit()
+# print(results.summary())
+## XX *** ERRORS OUT
+
+## XX *** ASK TAs FOR HELP IN LUNCH
+mc = MultiComparison(distinct_df.salary_est[distinct_df.bachelors==1],
+                     distinct_df.salary_est[distinct_df.mba == 1],
+                     distinct_df.salary_est[distinct_df.masters == 1],
+                     distinct_df.salary_est[distinct_df.phd == 1],
+                     distinct_df["salary_est"])
+
+result = mc.tukeyhsd()
+print(result)
+print(mc.groupsunique)
+# x = sm.add_constant(distinct_df[["salary_est"]])
+# model = sm.OLS(distinct_df["rating"], x)
+# results = model.fit()
+# print(results.summary())
+############################################## XX *** TO DO: REGRESSION, SALARY AND SIZE, BOXPLOT EDUC AND SALARY. MEASURE VIF
+
+# Objective: display the correlations between all the variables
+# Input: a data frame
+# output: display of correlations between every variable combination
+
+corr = distinct_df.corr()
+f, ax = plt.subplots(figsize=(10, 8))
+mask = np.zeros_like(corr, dtype=np.bool)
+mask[np.triu_indices_from(mask)] = True
+sns.heatmap(corr, mask=mask, cmap=sns.diverging_palette(220, -10, as_cmap=True),
+            square=True, ax=ax)
+plt.show()
+print(distinct_df[distinct_df.company_name=="HBO"])
+## Regression
+# regr = linear_model.LinearRegression()
+# # x = distinct_df.iloc[:,[3,5]]
+# regr.fit(distinct_df[["salary_est"]], distinct_df["rating"])
+# # The coefficients
+# print('Coefficients: \n', regr.coef_)
+# # The mean squared error
+# print("Mean squared error: %.2f"
+#       % np.mean((regr.predict(distinct_df[["salary_est"]]) - distinct_df["rating"]) ** 2))
+# # Explained variance score: 1 is perfect prediction
+# print('Variance score: %.2f' % regr.score(distinct_df[["salary_est"]], distinct_df["rating"]))
+# print(regr.predict((distinct_df[["salary_est"]])))
+
+
+
+#
+# # generate an array of rainbow colors by fixing the saturation and lightness of the HSL representation of colour
+# # and marching around the hue.
+#
+# c = ['hsl('+str(h)+',50%'+',50%)' for h in np.linspace(0, 360, N)]
+#
+# #loading the data with filters
+# data = [{
+#     'y': gamedf.starrating[gamedf.gamecategory == j],
+#     'name': j,
+#     'type':'box',
+#     'marker':{'color': c[i]}
+#     } for i, j in enumerate(totalgamecategory)]
+#
+#
+# # format the layout
+# layout = {'xaxis': {'showgrid':False,'zeroline':False, 'tickangle':60,'showticklabels':False},
+#           'yaxis': {'zeroline':False,'gridcolor':'white'},
+#           'paper_bgcolor': 'rgb(233,233,233)',
+#           'plot_bgcolor': 'rgb(233,233,233)',
+#           }
+#
+# py.offline.iplot(data)
+
+
+### GOT TO SORT ON MEDIUM FOR BAR PLOT AND TOTAL COUNTS FOR SKILLS XX ***
 
 #count based on location - done better
 #count based on degree - done
-#count based on skills
-#count based on industry
-#x = salary, y = job count for company and industry
-#x = salary, y = rating for company
-#x = salary, y = size
-#regression
-#get years of experience to work?
-#boxplot for educaiton and s
+#count based on skills - done
+#count based on industry -doneish with the salary/jobcount
+#look up living cost per state - done
+#x = salary, y = job count for industry -done
+#x = salary, y = rating for company - a bit ugly
+#x = salary, y = size - done
+#regression - check linearity and normality check homo/hetro skedastic. - Will implement later XX ***
+# check correlation between education. partial f tests
+# do a correlation matrix - done
+# get years of experience to work? - WIll implement later XX ***
+# boxplot for educaiton and salary range
 
+#nested anova - all the stats in an anova and the salary ranges?
+# regression for west vs east instead of all?
+
+#show
